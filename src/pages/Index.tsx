@@ -46,7 +46,7 @@ const Index = () => {
                   Start AI Consultation
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-4 font-semibold text-lg backdrop-blur-sm">
+              <Button size="lg" variant="outline" className="border-white/30 text-black hover:bg-white/10 rounded-full px-8 py-4 font-semibold text-lg backdrop-blur-sm">
                 <Activity className="mr-2 h-5 w-5" />
                 View Health Dashboard
               </Button>
@@ -129,8 +129,8 @@ const Index = () => {
                   Get Started Free
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-4 font-bold text-lg backdrop-blur-sm">
-git                 Learn More
+              <Button size="lg" variant="outline" className="border-white/30 text-black hover:bg-white/10 rounded-full px-8 py-4 font-bold text-lg backdrop-blur-sm">
+                Learn More
               </Button>
             </div>
           </div>
