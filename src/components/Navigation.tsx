@@ -11,7 +11,8 @@ import {
   User,
   Settings,
   Heart,
-  Plane
+  Plane,
+  CloudSun
 } from "lucide-react";
 
 const Navigation = () => {
@@ -22,6 +23,7 @@ const Navigation = () => {
     { path: '/symptoms', label: 'Report Symptoms', icon: <Bell className="h-5 w-5" /> },
     { path: '/map', label: 'Outbreak Map', icon: <Map className="h-5 w-5" /> },
     { path: '/travel', label: 'Travel Health', icon: <Plane className="h-5 w-5" /> },
+    { path: '/climate', label: 'Climate Insights', icon: <CloudSun className="h-5 w-5" /> },
     { path: '/chat', label: 'Medical Assistant', icon: <MessageCircle className="h-5 w-5" /> },
   ];
   

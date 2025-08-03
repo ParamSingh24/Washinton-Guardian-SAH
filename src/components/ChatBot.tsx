@@ -1,9 +1,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { fetchGeminiAdvice, analyzeXrayImage } from "@/lib/ai-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Send, Plus, Image, Heart, Phone } from "lucide-react";
+import { Mic, Send, Plus, Image, Heart, Phone, Upload } from "lucide-react";
 import { availableSymptoms, generateAIResponse, Symptom } from "@/lib/ai-utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -19,7 +20,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hello! I'm your Washington Guardian AI assistant. How can I help you with your health concerns today?",
+      content: "👋 Hello! I'm your AI Healthcare Assistant powered by Google Gemini. I can help you with:\n\n🩺 Symptom analysis & health guidance\n💊 Medication information & interactions\n🏥 X-ray analysis & medical imaging\n🔬 Lab results interpretation\n🎯 Personalized health recommendations\n\nHow can I assist you with your health today?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -63,29 +64,44 @@ const ChatBot = () => {
 
     setIsTyping(true);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsTyping(false);
       
-      const aiResponse = generateAIResponse(matchedSymptoms);
-      
-      const newBotMessage: Message = {
-        id: `bot-${Date.now()}`,
-        content: aiResponse,
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, newBotMessage]);
-      setIsProcessing(false);
-      
-      if (matchedSymptoms.length > 0) {
-        toast({
-          title: `${matchedSymptoms.length} symptom${matchedSymptoms.length > 1 ? 's' : ''} identified`,
-          description: "The AI is analyzing your symptoms.",
-          variant: "default",
-          duration: 3000,
-        });
+      try {
+        const aiResponse = await fetchGeminiAdvice(input, matchedSymptoms);
+        
+        const newBotMessage: Message = {
+          id: `bot-${Date.now()}`,
+          content: aiResponse,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, newBotMessage]);
+        
+        if (matchedSymptoms.length > 0) {
+          toast({
+            title: `${matchedSymptoms.length} symptom${matchedSymptoms.length > 1 ? 's' : ''} identified`,
+            description: "The AI is analyzing your symptoms.",
+            variant: "default",
+            duration: 3000,
+          });
+        }
+      } catch (error) {
+        console.error('Error getting AI response:', error);
+        const fallbackResponse = generateAIResponse(matchedSymptoms);
+        
+        const newBotMessage: Message = {
+          id: `bot-${Date.now()}`,
+          content: fallbackResponse,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, newBotMessage]);
       }
+      
+      setIsProcessing(false);
     }, 1500);
   };
 
@@ -125,12 +141,70 @@ const ChatBot = () => {
     }, 2000);
   };
   
-  const simulateImageUpload = () => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if it's an image file
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file (JPEG, PNG, etc.)",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    setIsTyping(true);
+
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      content: `Uploaded X-ray image: ${file.name}`,
+      sender: "user",
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
     toast({
-      title: "Feature coming soon",
-      description: "Image uploads for symptom analysis will be available soon.",
+      title: "Analyzing X-ray",
+      description: "AI is analyzing your X-ray image...",
       duration: 3000,
     });
+
+    try {
+      const analysis = await analyzeXrayImage(file);
+      
+      setTimeout(() => {
+        setIsTyping(false);
+        
+        const botMessage: Message = {
+          id: `bot-${Date.now()}`,
+          content: analysis,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, botMessage]);
+        setIsProcessing(false);
+      }, 2000);
+      
+    } catch (error) {
+      setIsTyping(false);
+      setIsProcessing(false);
+      
+      toast({
+        title: "Analysis failed",
+        description: "Unable to analyze the X-ray. Please try again or consult a healthcare professional.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+
+    // Reset the input
+    event.target.value = '';
   };
 
   const connectToDoctor = () => {
@@ -142,7 +216,26 @@ const ChatBot = () => {
   };
 
   return (
-    <Card className="flex flex-col h-full max-h-[600px] border-pink-300/30 shadow-lg shadow-pink-100/30 bg-white/95 backdrop-blur-sm">
+    <Card className="flex flex-col h-full max-h-[700px] border-0 shadow-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-xl">
+      {/* Chat Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Heart className="h-5 w-5 text-white" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+          </div>
+          <div>
+            <h3 className="font-bold text-white">Healthcare AI Assistant</h3>
+            <p className="text-xs text-white/80">Powered by Google Gemini</p>
+          </div>
+        </div>
+        <div className="text-xs text-white/80 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+          Online
+        </div>
+      </div>
+      
       <CardContent className="flex-1 p-0 flex flex-col h-full min-h-0">
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white to-pink-50/50 min-h-0">
           {messages.map((message) => (
@@ -225,24 +318,36 @@ const ChatBot = () => {
               <span className="sr-only">Voice input</span>
             </Button>
             
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              onClick={simulateImageUpload}
-              disabled={isProcessing}
-              className="text-pink-500 border-pink-200 hover:text-pink-600 hover:border-pink-300 hover:bg-pink-50 flex-shrink-0"
-            >
-              <Image className="h-4 w-4" />
-              <span className="sr-only">Upload image</span>
-            </Button>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isProcessing}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="xray-upload"
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                disabled={isProcessing}
+                className="text-pink-500 border-pink-200 hover:text-pink-600 hover:border-pink-300 hover:bg-pink-50 flex-shrink-0"
+                asChild
+              >
+                <label htmlFor="xray-upload" className="cursor-pointer flex items-center justify-center w-full h-full">
+                  <Upload className="h-4 w-4" />
+                  <span className="sr-only">Upload X-ray</span>
+                </label>
+              </Button>
+            </div>
             
             <Input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your health concern..."
+              placeholder="Describe symptoms, ask about medications, or upload X-rays..."
               disabled={isProcessing}
               className="flex-1 border-pink-200 focus-visible:ring-pink-400"
             />
@@ -262,7 +367,7 @@ const ChatBot = () => {
           <div className="flex justify-center mt-3">
             <div className="flex items-center text-xs text-pink-400 space-x-1">
               <Heart className="h-3 w-3" />
-              <span>Washington Guardian AI</span>
+              <span>Healthcare AI - Powered by Gemini</span>
             </div>
           </div>
         </div>

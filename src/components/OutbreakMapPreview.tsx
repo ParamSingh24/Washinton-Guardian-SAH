@@ -44,7 +44,7 @@ const OutbreakMapPreview = () => {
             <p className="text-sm flex items-center">
               <MapPin className="h-4 w-4 text-red-500 mr-1" />
               <span className="text-red-500 font-semibold">Severe alert</span> 
-              <span className="text-gray-600 ml-1">detected in Vancouver area</span>
+              <span className="text-gray-600 ml-1">detected in Santa Ana area</span>
             </p>
             <button className="text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors">
               View detailed analysis

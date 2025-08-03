@@ -21,7 +21,7 @@ const MapPage = () => {
             </h1>
           </div>
           <p className="text-muted-foreground max-w-2xl">
-            Live visualization of health patterns and potential outbreak clusters across Washington State
+            Live visualization of health patterns and potential outbreak clusters across California
           </p>
         </div>
         

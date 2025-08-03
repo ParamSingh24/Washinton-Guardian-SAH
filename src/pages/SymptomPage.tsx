@@ -1,7 +1,7 @@
 
 import React from "react";
 import Navigation from "@/components/Navigation";
-import SymptomReporting from "@/components/SymptomReporting";
+import RealTimeSymptomReporting from "@/components/RealTimeSymptomReporting";
 
 const SymptomPage = () => {
   return (
@@ -17,7 +17,7 @@ const SymptomPage = () => {
         </div>
         
         <div className="max-w-2xl mx-auto">
-          <SymptomReporting />
+              <RealTimeSymptomReporting />
           
           <div className="mt-8 bg-guardian-light rounded-lg p-4">
             <h2 className="text-lg font-semibold text-guardian-secondary mb-2">Why Report Your Symptoms?</h2>

@@ -9,6 +9,7 @@ import SymptomPage from "./pages/SymptomPage";
 import MapPage from "./pages/MapPage";
 import TravelMapPage from "./pages/TravelMapPage";
 import ChatPage from "./pages/ChatPage";
+import ClimatePage from "./pages/ClimatePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/map" element={<MapPage />} />
           <Route path="/travel" element={<TravelMapPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/climate" element={<ClimatePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
