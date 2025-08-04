@@ -47,31 +47,32 @@ const StatsCards = () => {
       {statsData.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
-          <Card key={index} className={`group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 bg-gradient-to-br ${stat.bgGradient} hover:scale-105`}>
-            <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
-            <CardContent className="relative p-6">
+          <div key={index} className="glass-stats-card group floating-element">
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300 rounded-[1.5rem]`}></div>
+            <div className="relative p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg`}>
-                  <IconComponent className="h-6 w-6 text-white" />
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg glass-shimmer`}>
+                  <IconComponent className="h-6 w-6 text-white relative z-10" />
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r ${stat.gradient} text-white text-xs font-semibold`}>
+                <div className={`glass-button flex items-center gap-1 px-3 py-1 text-slate-700 text-xs font-semibold border-slate-300/30`}>
                   <TrendingUp className="h-3 w-3" />
                   {stat.change}
                 </div>
               </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-slate-300/30 to-transparent my-4" />
               <div className="space-y-2">
-                <h3 className="text-3xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
+                <h3 className="text-3xl font-bold text-slate-800 group-hover:text-slate-700 transition-colors">
                   {stat.value}
                 </h3>
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-sm font-semibold text-slate-700">
                   {stat.title}
                 </p>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   {stat.desc}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         );
       })}
     </div>

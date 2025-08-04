@@ -10,7 +10,6 @@ import {
   Map,
   User,
   Settings,
-  Heart,
   Plane,
   CloudSun
 } from "lucide-react";
@@ -28,50 +27,47 @@ const Navigation = () => {
   ];
   
   return (
-    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-xl border-b border-pink-300/30 shadow-md shadow-pink-200/20">
+    <header className="sticky top-0 z-50 w-full glass-navbar">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold shadow-lg">
-            <Heart className="h-5 w-5" />
-          </div>
-          <span className="hidden md:inline-block font-['Inter'] font-bold text-xl text-white">
+          <span className="hidden md:inline-block text-center font-bold text-xl text-white drop-shadow-sm">
             Washington Guardian
           </span>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-1 mx-4">
+        <nav className="hidden md:flex items-center space-x-2 mx-4">
           {navItems.map(item => (
             <Link 
               key={item.path} 
               to={item.path}
               onClick={() => setCurrentRoute(item.path)}
               className={cn(
-                "flex items-center px-4 py-2 rounded-lg transition-all duration-200",
+                "glass-nav-item flex items-center px-4 py-2 text-sm font-medium",
                 currentRoute === item.path 
-                  ? "text-white bg-white/20 shadow-inner" 
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "glass-nav-item active text-white" 
+                  : "text-white/80 hover:text-white"
               )}
             >
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center relative z-10">
                 <span className="mr-2">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="text-center">{item.label}</span>
               </div>
             </Link>
           ))}
         </nav>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="rounded-full bg-white/10 hover:bg-white/20 text-white">
+          <Button variant="ghost" size="icon" className="glass-button-enhanced rounded-full text-white hover:text-white">
             <Settings className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full bg-white/10 hover:bg-white/20 text-white">
+          <Button variant="ghost" size="icon" className="glass-button-enhanced rounded-full text-white hover:text-white">
             <User className="h-5 w-5" />
           </Button>
         </div>
       </div>
       
       {/* Mobile navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-pink-300/30 bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-lg z-50 shadow-lg shadow-pink-200/10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 glass-navbar z-50">
         <div className="flex items-center justify-around py-2">
           {navItems.map(item => (
             <Link 
@@ -79,14 +75,16 @@ const Navigation = () => {
               to={item.path}
               onClick={() => setCurrentRoute(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center py-2 px-3",
+                "glass-nav-item flex flex-col items-center justify-center py-2 px-3 rounded-lg",
                 currentRoute === item.path 
-                  ? "text-white" 
+                  ? "glass-nav-item active text-white" 
                   : "text-white/80"
               )}
             >
-              {item.icon}
-              <span className="text-xs mt-1">{item.label}</span>
+              <div className="relative z-10">
+                {item.icon}
+                <span className="text-xs mt-1 block">{item.label}</span>
+              </div>
             </Link>
           ))}
         </div>

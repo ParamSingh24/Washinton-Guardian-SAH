@@ -9,8 +9,8 @@ const OutbreakMapPreview = () => {
   const totalReports = monitoredLocations.reduce((sum, loc) => sum + loc.reportCount, 0);
 
   return (
-    <Card className="overflow-hidden border-pink-200 shadow-lg shadow-pink-100/30 bg-white/90 backdrop-blur-sm hover:shadow-pink-200/50 transition-shadow duration-300">
-      <CardHeader className="pb-3 border-b border-pink-100 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+    <Card className="map-preview-card overflow-hidden rounded-consistent shadow-glass hover:shadow-glass-hover transition-all duration-300">
+      <CardHeader className="map-preview-header pb-3 rounded-t-consistent">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg font-semibold flex items-center text-gray-800">
             <Activity className="mr-2 h-5 w-5 text-pink-500" />
@@ -21,10 +21,10 @@ const OutbreakMapPreview = () => {
           </span>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-2">
         <GoogleMap />
-        
-        <div className="px-4 py-4 border-t border-pink-100 bg-gradient-to-r from-pink-50/50 to-purple-50/50">
+
+        <div className="map-preview-footer px-4 py-4 rounded-b-consistent">
           <div className="grid grid-cols-3 gap-4 mb-3">
             <div className="text-center">
               <div className="text-lg font-bold text-pink-600">{totalReports}</div>
@@ -39,11 +39,11 @@ const OutbreakMapPreview = () => {
               <div className="text-xs text-gray-600">Monitored Cities</div>
             </div>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <p className="text-sm flex items-center">
               <MapPin className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-red-500 font-semibold">Severe alert</span> 
+              <span className="text-red-500 font-semibold">Severe alert</span>
               <span className="text-gray-600 ml-1">detected in Santa Ana area</span>
             </p>
             <button className="text-xs text-pink-600 hover:text-pink-700 hover:underline transition-colors">

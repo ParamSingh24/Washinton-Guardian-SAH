@@ -1,10 +1,10 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { fetchGeminiAdvice, analyzeXrayImage } from "@/lib/ai-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Send, Plus, Image, Heart, Phone, Upload } from "lucide-react";
+import { Mic, Send, Heart, Phone, Upload } from "lucide-react";
 import { availableSymptoms, generateAIResponse, Symptom } from "@/lib/ai-utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -54,7 +54,7 @@ const ChatBot = () => {
       sender: "user",
       timestamp: new Date(),
     };
-    
+
     setMessages((prev) => [...prev, newUserMessage]);
     setInput("");
     setIsProcessing(true);
@@ -63,22 +63,22 @@ const ChatBot = () => {
     setSelectedSymptoms(matchedSymptoms);
 
     setIsTyping(true);
-    
+
     setTimeout(async () => {
       setIsTyping(false);
-      
+
       try {
         const aiResponse = await fetchGeminiAdvice(input, matchedSymptoms);
-        
+
         const newBotMessage: Message = {
           id: `bot-${Date.now()}`,
           content: aiResponse,
           sender: "bot",
           timestamp: new Date(),
         };
-        
+
         setMessages((prev) => [...prev, newBotMessage]);
-        
+
         if (matchedSymptoms.length > 0) {
           toast({
             title: `${matchedSymptoms.length} symptom${matchedSymptoms.length > 1 ? 's' : ''} identified`,
@@ -90,23 +90,23 @@ const ChatBot = () => {
       } catch (error) {
         console.error('Error getting AI response:', error);
         const fallbackResponse = generateAIResponse(matchedSymptoms);
-        
+
         const newBotMessage: Message = {
           id: `bot-${Date.now()}`,
           content: fallbackResponse,
           sender: "bot",
           timestamp: new Date(),
         };
-        
+
         setMessages((prev) => [...prev, newBotMessage]);
       }
-      
+
       setIsProcessing(false);
     }, 1500);
   };
 
   const identifySymptoms = (input: string): Symptom[] => {
-    return availableSymptoms.filter(symptom => 
+    return availableSymptoms.filter(symptom =>
       input.toLowerCase().includes(symptom.name.toLowerCase())
     );
   };
@@ -119,20 +119,20 @@ const ChatBot = () => {
 
   const simulateVoiceInput = () => {
     setIsProcessing(true);
-    
+
     toast({
       title: "Voice recording started",
       description: "Listening to your health concerns...",
       duration: 2000,
     });
-    
+
     setTimeout(() => {
       const voiceText = "I've been having a fever and cough since yesterday. My temperature is around 100°F.";
       setInput(voiceText);
       setIsProcessing(false);
-      
+
       inputRef.current?.focus();
-      
+
       toast({
         title: "Voice captured",
         description: "You can edit the text before sending.",
@@ -140,7 +140,7 @@ const ChatBot = () => {
       });
     }, 2000);
   };
-  
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -176,25 +176,25 @@ const ChatBot = () => {
 
     try {
       const analysis = await analyzeXrayImage(file);
-      
+
       setTimeout(() => {
         setIsTyping(false);
-        
+
         const botMessage: Message = {
           id: `bot-${Date.now()}`,
           content: analysis,
           sender: "bot",
           timestamp: new Date(),
         };
-        
+
         setMessages((prev) => [...prev, botMessage]);
         setIsProcessing(false);
       }, 2000);
-      
+
     } catch (error) {
       setIsTyping(false);
       setIsProcessing(false);
-      
+
       toast({
         title: "Analysis failed",
         description: "Unable to analyze the X-ray. Please try again or consult a healthcare professional.",
@@ -216,42 +216,44 @@ const ChatBot = () => {
   };
 
   return (
-    <Card className="flex flex-col h-full max-h-[700px] border-0 shadow-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-xl">
+    <div className="glass-card-enhanced flex flex-col h-full max-h-[700px] rounded-3xl transition-all duration-500 ease-in-out hover:shadow-2xl overflow-hidden">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-5 border-b border-white/15 rounded-t-3xl backdrop-blur-xl transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-600 via-purple-600 via-pink-600 to-emerald-500 shadow-lg">
+        <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Heart className="h-5 w-5 text-white" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transition-all duration-300 ease-in-out hover:scale-110 bg-gradient-to-br from-white/30 to-white/20 shadow-lg shadow-emerald-500/25">
+              <Heart className="h-5 w-5 text-white transition-all duration-200 ease-in-out" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse shadow-lg"></div>
           </div>
-          <div>
-            <h3 className="font-bold text-white">Healthcare AI Assistant</h3>
-            <p className="text-xs text-white/80">Powered by Google Gemini</p>
+          <div className="transition-all duration-300 ease-in-out">
+            <h3 className="font-bold text-white text-lg drop-shadow-md transition-all duration-200 ease-in-out">Healthcare AI Assistant</h3>
+            <p className="text-sm text-white/85 transition-all duration-200 ease-in-out">Powered by Google Gemini • Always Available</p>
           </div>
         </div>
-        <div className="text-xs text-white/80 bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-          Online
+        <div className="text-sm text-white px-4 py-2 rounded-full backdrop-blur-sm transition-all duration-300 ease-in-out bg-gradient-to-br from-white/25 to-white/15 border border-white/30 shadow-lg hover:bg-gradient-to-br hover:from-white/35 hover:to-white/20 hover:scale-105">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            Online
+          </div>
         </div>
       </div>
-      
+
       <CardContent className="flex-1 p-0 flex flex-col h-full min-h-0">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white to-pink-50/50 min-h-0">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 min-h-0 custom-scrollbar backdrop-blur-sm bg-gradient-to-br from-white/80 via-blue-50/60 to-purple-50/40">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} animate-fade-in transition-all duration-500 ease-out`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-md ${
-                  message.sender === "user"
-                    ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white"
-                    : "bg-white border border-pink-100"
-                }`}
+                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-lg transition-all duration-300 ease-in-out backdrop-blur-md ${message.sender === "user"
+                  ? "message-bubble-user text-white"
+                  : "message-bubble-bot text-gray-800"
+                  }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <p className="text-xs opacity-70 mt-1">
+                <p className="text-sm whitespace-pre-wrap transition-all duration-200 ease-in-out">{message.content}</p>
+                <p className="text-xs opacity-70 mt-1 transition-all duration-200 ease-in-out">
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -260,30 +262,30 @@ const ChatBot = () => {
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
-            <div className="flex justify-start animate-fade-in">
-              <div className="bg-white rounded-2xl px-4 py-3 border border-pink-100 shadow-md">
+            <div className="flex justify-start animate-fade-in transition-all duration-500 ease-out">
+              <div className="typing-indicator rounded-2xl px-4 py-3 shadow-lg transition-all duration-300 ease-in-out backdrop-blur-md">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse delay-150"></div>
-                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse delay-300"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse transition-all duration-200 ease-in-out"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-150 transition-all duration-200 ease-in-out"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-300 transition-all duration-200 ease-in-out"></div>
                 </div>
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
-        
+
         {selectedSymptoms.length > 0 && (
-          <div className="px-4 py-2 bg-pink-50 border-t border-pink-100 flex-shrink-0">
-            <p className="text-xs text-pink-600 font-medium">Identified symptoms:</p>
-            <div className="flex flex-wrap gap-1 mt-1">
+          <div className="px-5 py-3 border-t border-white/15 flex-shrink-0 backdrop-blur-md transition-all duration-300 ease-in-out bg-gradient-to-br  border-emerald-500/15 shadow-lg shadow-emerald-500/10">
+            <p className="text-sm text-emerald-700 font-semibold transition-all duration-200 ease-in-out mb-2">🩺 Identified symptoms:</p>
+            <div className="flex flex-wrap gap-2">
               {selectedSymptoms.map(symptom => (
-                <span 
+                <span
                   key={symptom.id}
-                  className="text-xs bg-white px-2 py-0.5 rounded-full border border-pink-200 shadow-sm hover:bg-pink-50 transition-colors"
+                  className="text-sm px-3 py-1 rounded-full shadow-md hover:scale-105 transition-all duration-300 ease-in-out backdrop-blur-sm bg-gradient-to-br from-white/80 to-white/60 border border-emerald-500/20 text-emerald-700 font-medium shadow-emerald-500/15 hover:bg-gradient-to-br hover:from-white/90 hover:to-white/70 hover:shadow-lg"
                 >
                   {symptom.name}
                 </span>
@@ -292,32 +294,33 @@ const ChatBot = () => {
           </div>
         )}
 
-        <div className="p-4 border-t border-pink-100 bg-white flex-shrink-0">
-          <div className="flex space-x-2 mb-3">
+        <div className="p-5 border-t border-white/15 flex-shrink-0 backdrop-blur-md transition-all duration-300 ease-in-out bg-gradient-to-br from-white/80 to-white/60 rounded-b-3xl shadow-lg">
+          <div className="flex space-x-3 mb-4">
             <Button
               type="button"
               size="sm"
               onClick={connectToDoctor}
-              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+              className="flex-1 text-white font-semibold text-sm py-3 backdrop-blur-lg bg-gradient-to-r from-emerald-500/25 to-emerald-600/20 border border-emerald-500/35 rounded-xl shadow-lg shadow-emerald-500/25 hover:bg-gradient-to-r hover:from-emerald-500/40 hover:to-emerald-600/30 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/30 hover:translate-y-[-1px] transition-all duration-300 ease-in-out"
             >
-              <Phone className="h-4 w-4 mr-2" />
+              <Phone className="h-4 w-4 mr-2 transition-all duration-200 ease-in-out" />
               Connect to Doctor
             </Button>
           </div>
-          
-          <div className="flex space-x-2">
+
+          <div className="flex space-x-3">
             <Button
               type="button"
               size="icon"
               variant="outline"
               onClick={simulateVoiceInput}
               disabled={isProcessing}
-              className="text-pink-500 border-pink-200 hover:text-pink-600 hover:border-pink-300 hover:bg-pink-50 flex-shrink-0"
+              className="text-blue-600 flex-shrink-0 backdrop-blur-lg bg-gradient-to-br from-white/25 to-white/15 border border-white/30 rounded-xl shadow-lg hover:bg-gradient-to-br hover:from-white/35 hover:to-white/20 hover:border-white/45 hover:shadow-xl hover:translate-y-[-1px] transition-all duration-300 ease-in-out"
+              title="Voice Input"
             >
-              <Mic className="h-4 w-4" />
+              <Mic className="h-4 w-4 transition-all duration-200 ease-in-out" />
               <span className="sr-only">Voice input</span>
             </Button>
-            
+
             <div className="relative">
               <input
                 type="file"
@@ -332,47 +335,49 @@ const ChatBot = () => {
                 size="icon"
                 variant="outline"
                 disabled={isProcessing}
-                className="text-pink-500 border-pink-200 hover:text-pink-600 hover:border-pink-300 hover:bg-pink-50 flex-shrink-0"
+                className="text-purple-600 flex-shrink-0 backdrop-blur-lg bg-gradient-to-br from-white/25 to-white/15 border border-white/30 rounded-lg shadow-lg hover:bg-gradient-to-br hover:from-white/35 hover:to-white/20 hover:border-white/45 hover:shadow-xl hover:translate-y-[-1px] transition-all duration-300 ease-in-out w-10 h-10"
+                title="Upload X-ray"
                 asChild
               >
-                <label htmlFor="xray-upload" className="cursor-pointer flex items-center justify-center w-full h-full">
-                  <Upload className="h-4 w-4" />
+                <label htmlFor="xray-upload" className="cursor-pointer flex items-center justify-center min-w-full h-full transition-all duration-200 ease-in-out">
+                  <Upload className="h-4 w-4 transition-all duration-200 ease-in-out" />
                   <span className="sr-only">Upload X-ray</span>
                 </label>
               </Button>
             </div>
-            
+
             <Input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe symptoms, ask about medications, or upload X-rays..."
+              placeholder="💬 Describe symptoms, ask about medications, or upload X-rays..."
               disabled={isProcessing}
-              className="flex-1 border-pink-200 focus-visible:ring-pink-400"
+              className="flex-1 text-slate-700 backdrop-blur-lg bg-gradient-to-br from-white/35 to-white/20 border border-white/30 rounded-xl shadow-lg focus:bg-gradient-to-br focus:from-white/45 focus:to-white/25 focus:border-blue-500/50 focus:shadow-xl focus:shadow-blue-500/15 focus:translate-y-[-1px] transition-all duration-300 ease-in-out placeholder:text-slate-500/70"
             />
-            
+
             <Button
               type="button"
               size="icon"
               onClick={handleSendMessage}
               disabled={!input.trim() || isProcessing}
-              className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white flex-shrink-0"
+              className="text-white flex-shrink-0 backdrop-blur-lg bg-gradient-to-r from-blue-500/20 to-blue-600/15 border border-blue-500/30 rounded-xl shadow-lg shadow-blue-500/20 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-blue-600/20 hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/25 hover:translate-y-[-1px] transition-all duration-300 ease-in-out"
+              title="Send Message"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 transition-all duration-200 ease-in-out" />
               <span className="sr-only">Send message</span>
             </Button>
           </div>
 
-          <div className="flex justify-center mt-3">
-            <div className="flex items-center text-xs text-pink-400 space-x-1">
-              <Heart className="h-3 w-3" />
-              <span>Healthcare AI - Powered by Gemini</span>
+          <div className="flex justify-center mt-4">
+            <div className="flex items-center text-sm text-emerald-600 space-x-2 transition-all duration-300 ease-in-out hover:text-emerald-700">
+              <Heart className="h-4 w-4 transition-all duration-200 ease-in-out" />
+              <span className="transition-all duration-200 ease-in-out font-medium">🏥 Healthcare AI - Powered by Gemini</span>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 };
 

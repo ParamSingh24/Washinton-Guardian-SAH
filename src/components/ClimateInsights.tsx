@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,10 +12,35 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Info
+  Info,
+  ChevronDown,
+  MapPin,
+  Thermometer,
+  Droplets,
+  Eye,
+  Sun
 } from 'lucide-react';
 
+interface City {
+  id: string;
+  name: string;
+  state: string;
+  coordinates: { lat: number; lng: number };
+  population: string;
+  distanceFromLA: string;
+}
+
 interface ClimateData {
+  city: City;
+  lastUpdated: string;
+  currentWeather: {
+    temperature: number;
+    humidity: number;
+    windSpeed: number;
+    visibility: number;
+    uvIndex: number;
+    condition: string;
+  };
   earthquakes: {
     riskLevel: 'low' | 'moderate' | 'high';
     recentActivity: Array<{
@@ -82,73 +107,295 @@ interface ClimateData {
 }
 
 const ClimateInsights = () => {
-  // Mock climate data
-  const climateData: ClimateData = {
-    earthquakes: {
-      riskLevel: 'moderate',
-      recentActivity: [
-        { magnitude: 3.2, location: 'Puget Sound', date: '2024-01-15', depth: 15.2 },
-        { magnitude: 2.8, location: 'Olympic Peninsula', date: '2024-01-14', depth: 8.5 },
-        { magnitude: 4.1, location: 'Cascades', date: '2024-01-12', depth: 22.1 },
-      ],
-      zones: [
-        { name: 'Seattle Metropolitan', riskLevel: 'high' },
-        { name: 'Puget Sound Region', riskLevel: 'moderate' },
-        { name: 'Eastern Washington', riskLevel: 'low' },
-      ]
+  // Cities near Los Angeles
+  const cities: City[] = [
+    {
+      id: 'los-angeles',
+      name: 'Los Angeles',
+      state: 'CA',
+      coordinates: { lat: 34.0522, lng: -118.2437 },
+      population: '3.9M',
+      distanceFromLA: '0 miles'
     },
-    floods: {
-      riskLevel: 'high',
-      warnings: [
-        { area: 'Skagit River Valley', severity: 'moderate', expectedTime: '6-12 hours' },
-        { area: 'Snoqualmie River', severity: 'minor', expectedTime: '12-24 hours' },
-      ],
-      weatherPatterns: [
-        { pattern: 'Atmospheric River', impact: 'Heavy rainfall expected' },
-        { pattern: 'Snowmelt', impact: 'Elevated river levels' },
-      ]
+    {
+      id: 'santa-monica',
+      name: 'Santa Monica',
+      state: 'CA',
+      coordinates: { lat: 34.0195, lng: -118.4912 },
+      population: '93K',
+      distanceFromLA: '15 miles'
     },
-    tornadoes: {
-      riskLevel: 'low',
-      alerts: [
-        { area: 'Eastern Washington', severity: 'watch', validUntil: '6:00 PM PST' },
-      ],
-      zones: [
-        { name: 'Columbia Basin', riskLevel: 'moderate' },
-        { name: 'Palouse Region', riskLevel: 'low' },
-        { name: 'Western Washington', riskLevel: 'low' },
-      ]
+    {
+      id: 'pasadena',
+      name: 'Pasadena',
+      state: 'CA',
+      coordinates: { lat: 34.1478, lng: -118.1445 },
+      population: '138K',
+      distanceFromLA: '11 miles'
     },
-    wildfires: {
-      riskLevel: 'moderate',
-      currentFires: [
-        { name: 'Alpine Fire', size: '2,450 acres', containment: 65, location: 'Okanogan County' },
-        { name: 'Cedar Creek Fire', size: '890 acres', containment: 85, location: 'Chelan County' },
-      ],
-      conditions: {
-        temperature: 78,
-        humidity: 25,
-        windSpeed: 12,
-        fireWeatherIndex: 15
-      }
+    {
+      id: 'long-beach',
+      name: 'Long Beach',
+      state: 'CA',
+      coordinates: { lat: 33.7701, lng: -118.1937 },
+      population: '466K',
+      distanceFromLA: '20 miles'
     },
-    airQuality: {
-      aqi: 85,
-      level: 'moderate',
-      pollutants: [
-        { name: 'PM2.5', value: 25, unit: 'μg/m³', level: 'moderate' },
-        { name: 'PM10', value: 45, unit: 'μg/m³', level: 'good' },
-        { name: 'O3', value: 0.08, unit: 'ppm', level: 'moderate' },
-        { name: 'NO2', value: 0.03, unit: 'ppm', level: 'good' },
-      ],
-      healthRecommendations: [
-        'Sensitive individuals should limit outdoor activities',
-        'Consider wearing masks during outdoor exercise',
-        'Keep windows closed during high pollution hours',
-        'Use air purifiers indoors if available'
-      ]
+    {
+      id: 'burbank',
+      name: 'Burbank',
+      state: 'CA',
+      coordinates: { lat: 34.1808, lng: -118.3090 },
+      population: '103K',
+      distanceFromLA: '12 miles'
+    },
+    {
+      id: 'glendale',
+      name: 'Glendale',
+      state: 'CA',
+      coordinates: { lat: 34.1425, lng: -118.2551 },
+      population: '197K',
+      distanceFromLA: '8 miles'
+    },
+    {
+      id: 'anaheim',
+      name: 'Anaheim',
+      state: 'CA',
+      coordinates: { lat: 33.8366, lng: -117.9143 },
+      population: '346K',
+      distanceFromLA: '28 miles'
+    },
+    {
+      id: 'riverside',
+      name: 'Riverside',
+      state: 'CA',
+      coordinates: { lat: 33.9533, lng: -117.3962 },
+      population: '314K',
+      distanceFromLA: '55 miles'
+    }
+  ];
+
+  const [selectedCity, setSelectedCity] = useState<City>(cities[0]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Mock climate data for July 2025
+  const getClimateData = (city: City): ClimateData => {
+    const baseData = {
+      city,
+      lastUpdated: 'July 15, 2025 - 2:30 PM PDT',
+    };
+
+    switch (city.id) {
+      case 'los-angeles':
+        return {
+          ...baseData,
+          currentWeather: {
+            temperature: 84,
+            humidity: 65,
+            windSpeed: 8,
+            visibility: 6.2,
+            uvIndex: 9,
+            condition: 'Partly Cloudy'
+          },
+          earthquakes: {
+            riskLevel: 'high',
+            recentActivity: [
+              { magnitude: 4.2, location: 'San Fernando Valley', date: '2025-07-12', depth: 8.5 },
+              { magnitude: 3.8, location: 'Santa Monica Bay', date: '2025-07-10', depth: 12.3 },
+              { magnitude: 5.1, location: 'San Andreas Fault', date: '2025-07-08', depth: 15.7 },
+            ],
+            zones: [
+              { name: 'Downtown LA', riskLevel: 'high' },
+              { name: 'Hollywood Hills', riskLevel: 'high' },
+              { name: 'San Fernando Valley', riskLevel: 'moderate' },
+            ]
+          },
+          floods: {
+            riskLevel: 'low',
+            warnings: [],
+            weatherPatterns: [
+              { pattern: 'Summer Heat Dome', impact: 'Minimal precipitation expected' },
+              { pattern: 'Marine Layer', impact: 'Morning coastal fog' },
+            ]
+          },
+          tornadoes: {
+            riskLevel: 'low',
+            alerts: [],
+            zones: [
+              { name: 'LA Basin', riskLevel: 'low' },
+              { name: 'San Gabriel Valley', riskLevel: 'low' },
+              { name: 'South Bay', riskLevel: 'low' },
+            ]
+          },
+          wildfires: {
+            riskLevel: 'high',
+            currentFires: [
+              { name: 'Griffith Park Fire', size: '1,250 acres', containment: 45, location: 'Griffith Park' },
+              { name: 'Angeles Forest Fire', size: '3,800 acres', containment: 25, location: 'Angeles National Forest' },
+            ],
+            conditions: {
+              temperature: 95,
+              humidity: 15,
+              windSpeed: 18,
+              fireWeatherIndex: 28
+            }
+          },
+          airQuality: {
+            aqi: 125,
+            level: 'unhealthy-sensitive',
+            pollutants: [
+              { name: 'PM2.5', value: 45, unit: 'μg/m³', level: 'unhealthy' },
+              { name: 'PM10', value: 85, unit: 'μg/m³', level: 'moderate' },
+              { name: 'O3', value: 0.12, unit: 'ppm', level: 'unhealthy' },
+              { name: 'NO2', value: 0.08, unit: 'ppm', level: 'moderate' },
+            ],
+            healthRecommendations: [
+              'Sensitive groups should avoid outdoor activities',
+              'Everyone should limit prolonged outdoor exertion',
+              'Keep windows and doors closed',
+              'Use air purifiers and avoid outdoor exercise'
+            ]
+          }
+        };
+      
+      case 'santa-monica':
+        return {
+          ...baseData,
+          currentWeather: {
+            temperature: 78,
+            humidity: 72,
+            windSpeed: 12,
+            visibility: 8.5,
+            uvIndex: 7,
+            condition: 'Marine Layer'
+          },
+          earthquakes: {
+            riskLevel: 'moderate',
+            recentActivity: [
+              { magnitude: 3.5, location: 'Santa Monica Bay', date: '2025-07-11', depth: 10.2 },
+              { magnitude: 2.9, location: 'Malibu Coast', date: '2025-07-09', depth: 6.8 },
+            ],
+            zones: [
+              { name: 'Santa Monica', riskLevel: 'moderate' },
+              { name: 'Venice Beach', riskLevel: 'moderate' },
+              { name: 'Pacific Palisades', riskLevel: 'low' },
+            ]
+          },
+          floods: {
+            riskLevel: 'low',
+            warnings: [],
+            weatherPatterns: [
+              { pattern: 'Coastal Marine Layer', impact: 'Natural cooling effect' },
+              { pattern: 'Sea Breeze', impact: 'Afternoon wind patterns' },
+            ]
+          },
+          tornadoes: {
+            riskLevel: 'low',
+            alerts: [],
+            zones: [
+              { name: 'Coastal Areas', riskLevel: 'low' },
+              { name: 'Santa Monica Mountains', riskLevel: 'low' },
+            ]
+          },
+          wildfires: {
+            riskLevel: 'moderate',
+            currentFires: [
+              { name: 'Topanga Fire', size: '850 acres', containment: 70, location: 'Topanga Canyon' },
+            ],
+            conditions: {
+              temperature: 82,
+              humidity: 45,
+              windSpeed: 15,
+              fireWeatherIndex: 18
+            }
+          },
+          airQuality: {
+            aqi: 95,
+            level: 'moderate',
+            pollutants: [
+              { name: 'PM2.5', value: 28, unit: 'μg/m³', level: 'moderate' },
+              { name: 'PM10', value: 52, unit: 'μg/m³', level: 'moderate' },
+              { name: 'O3', value: 0.09, unit: 'ppm', level: 'moderate' },
+              { name: 'NO2', value: 0.04, unit: 'ppm', level: 'good' },
+            ],
+            healthRecommendations: [
+              'Air quality is acceptable for most people',
+              'Sensitive individuals may experience minor symptoms',
+              'Consider reducing outdoor activities during peak hours',
+              'Ocean breeze helps improve air circulation'
+            ]
+          }
+        };
+
+      default:
+        return {
+          ...baseData,
+          currentWeather: {
+            temperature: 86,
+            humidity: 58,
+            windSpeed: 10,
+            visibility: 7.0,
+            uvIndex: 8,
+            condition: 'Sunny'
+          },
+          earthquakes: {
+            riskLevel: 'moderate',
+            recentActivity: [
+              { magnitude: 3.1, location: `Near ${city.name}`, date: '2025-07-13', depth: 9.5 },
+              { magnitude: 2.7, location: `${city.name} Area`, date: '2025-07-11', depth: 7.2 },
+            ],
+            zones: [
+              { name: `${city.name} Metro`, riskLevel: 'moderate' },
+              { name: `${city.name} Suburbs`, riskLevel: 'low' },
+            ]
+          },
+          floods: {
+            riskLevel: 'low',
+            warnings: [],
+            weatherPatterns: [
+              { pattern: 'Summer Dry Pattern', impact: 'Low precipitation probability' },
+            ]
+          },
+          tornadoes: {
+            riskLevel: 'low',
+            alerts: [],
+            zones: [
+              { name: `${city.name} Area`, riskLevel: 'low' },
+            ]
+          },
+          wildfires: {
+            riskLevel: 'moderate',
+            currentFires: [
+              { name: `${city.name.split(' ')[0]} Hills Fire`, size: '1,100 acres', containment: 55, location: `Near ${city.name}` },
+            ],
+            conditions: {
+              temperature: 89,
+              humidity: 25,
+              windSpeed: 14,
+              fireWeatherIndex: 22
+            }
+          },
+          airQuality: {
+            aqi: 105,
+            level: 'unhealthy-sensitive',
+            pollutants: [
+              { name: 'PM2.5', value: 35, unit: 'μg/m³', level: 'moderate' },
+              { name: 'PM10', value: 68, unit: 'μg/m³', level: 'moderate' },
+              { name: 'O3', value: 0.10, unit: 'ppm', level: 'moderate' },
+              { name: 'NO2', value: 0.06, unit: 'ppm', level: 'moderate' },
+            ],
+            healthRecommendations: [
+              'Sensitive groups should limit outdoor activities',
+              'Consider indoor exercise alternatives',
+              'Monitor air quality throughout the day',
+              'Use air conditioning with good filtration'
+            ]
+          }
+        };
     }
   };
+
+  const climateData = getClimateData(selectedCity);
 
   const getRiskBadgeColor = (level: string) => {
     switch (level) {
@@ -169,16 +416,103 @@ const ClimateInsights = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-0 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-          <Activity className="h-6 w-6 text-blue-600" />
-          Climate Insights & Environmental Monitoring
-        </CardTitle>
+    <Card className="climate-card border-0 shadow-glass">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-800">
+            <Activity className="h-7 w-7 text-blue-600" />
+            Climate Insights & Environmental Monitoring
+          </CardTitle>
+          
+          {/* City Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-md border border-white/30 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:scale-105 min-w-[200px]"
+            >
+              <MapPin className="h-5 w-5 text-blue-600" />
+              <div className="flex-1 text-left">
+                <div className="font-semibold text-gray-800">{selectedCity.name}</div>
+                <div className="text-xs text-gray-600">{selectedCity.distanceFromLA} from LA</div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/30 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto">
+                {cities.map((city) => (
+                  <button
+                    key={city.id}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full px-4 py-3 text-left hover:bg-blue-50/50 transition-all duration-200 first:rounded-t-xl last:rounded-b-xl ${
+                      selectedCity.id === city.id ? 'bg-blue-100/50 border-l-4 border-blue-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-800">{city.name}, {city.state}</div>
+                        <div className="text-sm text-gray-600">Pop: {city.population} • {city.distanceFromLA}</div>
+                      </div>
+                      {selectedCity.id === city.id && (
+                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Current Weather Summary */}
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl border border-white/20">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sun className="h-5 w-5 text-yellow-500" />
+              <span className="font-semibold text-gray-800">Current Conditions</span>
+            </div>
+            <span className="text-sm text-gray-600">{climateData.lastUpdated}</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="text-center">
+              <Thermometer className="h-4 w-4 text-red-500 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-800">{climateData.currentWeather.temperature}°F</div>
+              <div className="text-xs text-gray-600">Temperature</div>
+            </div>
+            <div className="text-center">
+              <Droplets className="h-4 w-4 text-blue-500 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-800">{climateData.currentWeather.humidity}%</div>
+              <div className="text-xs text-gray-600">Humidity</div>
+            </div>
+            <div className="text-center">
+              <Wind className="h-4 w-4 text-gray-500 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-800">{climateData.currentWeather.windSpeed} mph</div>
+              <div className="text-xs text-gray-600">Wind Speed</div>
+            </div>
+            <div className="text-center">
+              <Eye className="h-4 w-4 text-gray-500 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-800">{climateData.currentWeather.visibility} mi</div>
+              <div className="text-xs text-gray-600">Visibility</div>
+            </div>
+            <div className="text-center">
+              <Sun className="h-4 w-4 text-orange-500 mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-800">{climateData.currentWeather.uvIndex}</div>
+              <div className="text-xs text-gray-600">UV Index</div>
+            </div>
+            <div className="text-center">
+              <CloudRain className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+              <div className="text-sm font-bold text-gray-800">{climateData.currentWeather.condition}</div>
+              <div className="text-xs text-gray-600">Condition</div>
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Earthquake Risk */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="climate-section rounded-consistent p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-orange-600" />
@@ -220,7 +554,7 @@ const ClimateInsights = () => {
         </div>
 
         {/* Flood Risk */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="climate-section rounded-consistent p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CloudRain className="h-5 w-5 text-blue-600" />
@@ -257,7 +591,7 @@ const ClimateInsights = () => {
         </div>
 
         {/* Tornado Risk */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="climate-section rounded-consistent p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Tornado className="h-5 w-5 text-gray-600" />
@@ -295,7 +629,7 @@ const ClimateInsights = () => {
         </div>
 
         {/* Wildfire Risk */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="climate-section rounded-consistent p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Flame className="h-5 w-5 text-red-600" />
@@ -345,7 +679,7 @@ const ClimateInsights = () => {
         </div>
 
         {/* Air Quality */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="climate-section rounded-consistent p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Wind className="h-5 w-5 text-green-600" />

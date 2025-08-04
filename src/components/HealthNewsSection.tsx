@@ -2,12 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Heart, 
-  TrendingUp, 
-  Clock, 
-  User, 
-  ArrowRight, 
+import {
+  Heart,
+  TrendingUp,
+  Clock,
+  User,
+  ArrowRight,
   Stethoscope,
   Brain,
   Shield,
@@ -171,8 +171,8 @@ const HealthNewsSection = () => {
       {/* Other Articles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {otherArticles.map((article) => (
-          <Card 
-            key={article.id} 
+          <Card
+            key={article.id}
             className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white hover:scale-105"
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${article.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
@@ -212,9 +212,9 @@ const HealthNewsSection = () => {
                   <Heart className="h-3 w-3" />
                   {article.readTime}
                 </span>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
+                <Button
+                  size="sm"
+                  variant="ghost"
                   className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
                 >
                   <ArrowRight className="h-4 w-4" />
